@@ -34,6 +34,7 @@ services:
       WORDPRESS_CONFIG_EXTRA: |
         define('WP_REDIS_HOST', 'redis');
         define('WP_REDIS_PORT', 6379);
+        define('DISABLE_WP_CRON', true);
         @ini_set( 'upload_max_size' , '2G' );
         @ini_set( 'post_max_size', '2G' );
         @ini_set( 'max_execution_time', '300' );
@@ -42,6 +43,12 @@ services:
             define('WP_HOME', 'https://' . $$proxy_host);
             define('WP_SITEURL', 'https://' . $$proxy_host);
             $$_SERVER['HTTPS'] = 'on';
+            $$_SERVER['SERVER_PORT'] = 443;
+            
+            # EL TRUCO: Interceptar el HTML de salida y reemplazar localhost por el túnel dinámico
+            ob_start(function($$buffer) use ($$proxy_host) {
+                return str_replace('http://localhost:8081', 'https://' . $$proxy_host, $$buffer);
+            });
         }
     volumes:
       - wp_data:/var/www/html/wp-content
