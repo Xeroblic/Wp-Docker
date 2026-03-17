@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mariadb:10.6
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://wordpress:80
+    depends_on:
+      - wordpress
+
+  wordpress:
+    depends_on:
+      - db
+      - redis
+    image: wordpress:latest
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: root
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        @ini_set( 'upload_max_size' , '2G' );
+        @ini_set( 'post_max_size', '2G' );
+        @ini_set( 'max_execution_time', '300' );
+        if (isset($$_SERVER['HTTP_CF_VISITOR'])) {
+            $$proxy_host = $$_SERVER['HTTP_HOST'];
+            define('WP_HOME', 'https://' . $$proxy_host);
+            define('WP_SITEURL', 'https://' . $$proxy_host);
+            $$_SERVER['HTTPS'] = 'on';
+        }
+    volumes:
+      - wp_data:/var/www/html/wp-content
+
+volumes:
+  db_data:
+  wp_data:
