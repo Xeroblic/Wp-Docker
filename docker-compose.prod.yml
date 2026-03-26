@@ -165,6 +165,13 @@ services:
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
       WORDPRESS_CONFIG_EXTRA: |
+        /* Site URL Configuration */
+        define( 'WP_HOME', 'https://' . getenv('DOMAIN') );
+        define( 'WP_SITEURL', 'https://' . getenv('DOMAIN') );
+        if ( PHP_SAPI === 'cli' ) {
+            $_SERVER['HTTP_HOST'] = getenv('DOMAIN');
+        }
+        
         /* Redis Cache */
         define('WP_REDIS_HOST', 'redis');
         define('WP_REDIS_PORT', 6379);
