@@ -166,31 +166,12 @@ services:
       WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
       WORDPRESS_CONFIG_EXTRA: |
         /* Site URL Configuration */
-        define( 'WP_HOME', 'https://' . getenv('DOMAIN') );
-        define( 'WP_SITEURL', 'https://' . getenv('DOMAIN') );
-        if ( PHP_SAPI === 'cli' ) {
-            $_SERVER['HTTP_HOST'] = getenv('DOMAIN');
-        }
-        
-        /* Redis Cache */
-        define('WP_REDIS_HOST', 'redis');
-        define('WP_REDIS_PORT', 6379);
-        
-        /* Performance */
-        define('DISABLE_WP_CRON', true);
-        define('WP_MEMORY_LIMIT', '512M');
-        define('WP_MAX_MEMORY_LIMIT', '1024M');
-        
-        /* Security */
-        define('DISALLOW_FILE_EDIT', true);
-        define('FORCE_SSL_ADMIN', true);
-        
-        /* Reverse Proxy / Load Balancer support */
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            $_SERVER['HTTPS'] = 'on';
-        }
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        define('WP_HOME', 'https://' . getenv('DOMAIN'));
+        define('WP_SITEURL', 'https://' . getenv('DOMAIN'));
+
+        /** Parche Dinámico para el Proxy de Easypanel/Traefik **/
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $$_SERVER['HTTPS'] = 'on';
         }
     volumes:
       - wp_data:/var/www/html
