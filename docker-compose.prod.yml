@@ -206,6 +206,7 @@ services:
       - no-new-privileges:true
     networks:
       - backend
+      - internet
 
   wp-cron:
     depends_on:
@@ -235,6 +236,7 @@ services:
       - no-new-privileges:true
     networks:
       - backend
+      - internet
 
 volumes:
   db_data:
@@ -252,4 +254,7 @@ networks:
   frontend:
     driver: bridge
   backend:
+    driver: bridge
+    internal: true
+  internet:
     driver: bridge
