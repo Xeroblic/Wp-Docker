@@ -52,10 +52,10 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
     command:
       - --innodb-buffer-pool-size=2G
       - --innodb-log-file-size=256M
@@ -159,12 +159,7 @@ services:
     expose:
       - "9000"
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: ${MYSQL_USER}
-      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
-      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
-      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
-      DOMAIN: ${DOMAIN}
+      WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_CONFIG_EXTRA: |
         /* Redis Object Cache */
         define('WP_REDIS_HOST', 'redis');
@@ -213,10 +208,7 @@ services:
     entrypoint: /bin/sh
     command: ["-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done"]
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: ${MYSQL_USER}
-      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
-      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_HOST: "db:3306"
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
