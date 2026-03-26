@@ -112,7 +112,7 @@ services:
       - backend
 
   nginx:
-    image: nginx:1.25-alpine
+    image: nginx:1.28.3-alpine
     restart: always
     depends_on:
       wordpress:
