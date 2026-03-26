@@ -211,7 +211,7 @@ services:
     depends_on:
       wordpress:
         condition: service_healthy
-    image: wordpress:6.5-php8.2-cli
+    image: wordpress:6.9.4-php8.2-fpm
     restart: always
     entrypoint: /bin/sh
     command: ["-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done"]
