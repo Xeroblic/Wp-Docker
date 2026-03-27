@@ -57,7 +57,7 @@ services:
       - MYSQL_USER
       - MYSQL_PASSWORD
     command:
-      - --innodb-buffer-pool-size=3G
+      - --innodb-buffer-pool-size=2G
       - --innodb-log-file-size=256M
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-flush-method=O_DIRECT
@@ -77,10 +77,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 3G
         reservations:
           cpus: '0.5'
-          memory: 1.5G
+          memory: 1G
     security_opt:
       - no-new-privileges:true
     networks:
@@ -89,7 +89,7 @@ services:
   redis:
     image: redis:7.2-alpine
     restart: always
-    command: redis-server --appendonly yes --maxmemory 1280mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
+    command: redis-server --appendonly yes --maxmemory 768mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
     volumes:
       - redis_data:/data
     healthcheck:
@@ -100,10 +100,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1.5G
+          memory: 1G
         reservations:
           cpus: '0.25'
-          memory: 512M
+          memory: 256M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -135,10 +135,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 384M
         reservations:
           cpus: '0.25'
-          memory: 128M
+          memory: 96M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -199,10 +199,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2560M
+          memory: 2G
         reservations:
           cpus: '0.5'
-          memory: 1G
+          memory: 768M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -230,10 +230,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 384M
         reservations:
           cpus: '0.1'
-          memory: 128M
+          memory: 96M
     security_opt:
       - no-new-privileges:true
     networks:
