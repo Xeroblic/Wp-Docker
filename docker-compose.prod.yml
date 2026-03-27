@@ -172,8 +172,8 @@ services:
       DOMAIN: ${DOMAIN}
       WORDPRESS_CONFIG_EXTRA: |
         /* Redis Object Cache */
-        define('WP_REDIS_HOST', 'redis');
-        define('WP_REDIS_PORT', 6379);
+        if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
+        if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
 
         /* Site URL Configuration */
         define('WP_HOME', 'https://' . getenv('DOMAIN'));
@@ -189,6 +189,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     healthcheck:
       test: ["CMD-SHELL", "pidof php-fpm || exit 1"]
       interval: 30s
@@ -225,6 +226,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     deploy:
       resources:
         limits:
