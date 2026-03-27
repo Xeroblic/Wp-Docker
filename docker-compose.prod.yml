@@ -157,10 +157,12 @@ services:
       - "9000"
     command: >
       sh -c '
-      sed -i "s/pm.max_children = 5/pm.max_children = 40/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.start_servers = 2/pm.start_servers = 10/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 5/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 20/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.max_children = 5/pm.max_children = 16/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.start_servers = 2/pm.start_servers = 4/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 2/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 8/g" /usr/local/etc/php-fpm.d/www.conf &&
+      echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf &&
+      echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf &&
       docker-entrypoint.sh php-fpm
       '
     environment:
