@@ -57,7 +57,7 @@ services:
       - MYSQL_USER
       - MYSQL_PASSWORD
     command:
-      - --innodb-buffer-pool-size=2G
+      - --innodb-buffer-pool-size=3G
       - --innodb-log-file-size=256M
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-flush-method=O_DIRECT
@@ -77,10 +77,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 4G
         reservations:
           cpus: '0.5'
-          memory: 1G
+          memory: 1.5G
     security_opt:
       - no-new-privileges:true
     networks:
@@ -89,7 +89,7 @@ services:
   redis:
     image: redis:7.2-alpine
     restart: always
-    command: redis-server --appendonly yes --maxmemory 896mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
+    command: redis-server --appendonly yes --maxmemory 1280mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
     volumes:
       - redis_data:/data
     healthcheck:
@@ -100,10 +100,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 1.5G
         reservations:
           cpus: '0.25'
-          memory: 256M
+          memory: 512M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -135,10 +135,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
           cpus: '0.25'
-          memory: 64M
+          memory: 128M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -199,10 +199,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1536M
+          memory: 2560M
         reservations:
           cpus: '0.5'
-          memory: 512M
+          memory: 1G
     security_opt:
       - no-new-privileges:true
     networks:
@@ -230,10 +230,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
           cpus: '0.1'
-          memory: 64M
+          memory: 128M
     security_opt:
       - no-new-privileges:true
     networks:
