@@ -77,7 +77,6 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
           memory: 3G
         reservations:
           cpus: '0.5'
@@ -101,7 +100,6 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 1G
         reservations:
           cpus: '0.25'
@@ -137,7 +135,6 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 256M
         reservations:
           cpus: '0.25'
@@ -158,6 +155,14 @@ services:
     restart: always
     expose:
       - "9000"
+    command: >
+      sh -c '
+      sed -i "s/pm.max_children = 5/pm.max_children = 40/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.start_servers = 2/pm.start_servers = 10/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 5/g" /usr/local/etc/php-fpm.d/www.conf &&
+      sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 20/g" /usr/local/etc/php-fpm.d/www.conf &&
+      docker-entrypoint.sh php-fpm
+      '
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_CONFIG_EXTRA: |
@@ -188,7 +193,6 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
           memory: 1536M
         reservations:
           cpus: '0.5'
@@ -215,7 +219,6 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 256M
         reservations:
           cpus: '0.1'
