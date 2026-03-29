@@ -172,6 +172,9 @@ services:
         if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
         if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
         if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
+        if (!defined('WP_REDIS_TIMEOUT')) define('WP_REDIS_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'lz4');
 
         /* Site URL Configuration */
         define('WP_HOME', 'https://' . getenv('DOMAIN'));
