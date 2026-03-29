@@ -68,8 +68,9 @@ services:
       - --max-heap-table-size=128M
       - --thread-cache-size=16
       - --table-open-cache=4000
+      - --max-allowed-packet=64M
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -93,7 +94,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -128,7 +129,7 @@ services:
       - wp_data:/var/www/html:ro
       - nginx_cache:/var/cache/nginx
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/nginx-health"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost/nginx-health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -156,15 +157,7 @@ services:
     expose:
       - "9000"
     command: >
-      sh -c '
-      sed -i "s/pm.max_children = 5/pm.max_children = 16/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.start_servers = 2/pm.start_servers = 4/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 2/g" /usr/local/etc/php-fpm.d/www.conf &&
-      sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 8/g" /usr/local/etc/php-fpm.d/www.conf &&
-      echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf &&
-      echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf &&
-      docker-entrypoint.sh php-fpm
-      '
+      sh -c ' sed -i "s/pm.max_children = 5/pm.max_children = 16/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.start_servers = 2/pm.start_servers = 4/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 2/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 8/g" /usr/local/etc/php-fpm.d/www.conf && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf && docker-entrypoint.sh php-fpm '
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -193,7 +186,7 @@ services:
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     healthcheck:
-      test: ["CMD-SHELL", "pidof php-fpm || exit 1"]
+      test: [ "CMD-SHELL", "pidof php-fpm || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -218,7 +211,7 @@ services:
     image: wordpress:6.9.4-php8.2-fpm
     restart: always
     entrypoint: /bin/sh
-    command: ["-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done"]
+    command: [ "-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done" ]
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_DB_USER: ${MYSQL_USER}
