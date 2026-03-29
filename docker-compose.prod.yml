@@ -152,7 +152,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    image: wordpress:6.9.4-php8.2-fpm
+    build:
+      context: ./php
+      dockerfile: Dockerfile
     restart: always
     expose:
       - "9000"
@@ -169,6 +171,7 @@ services:
         /* Redis Object Cache */
         if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
         if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
+        if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
 
         /* Site URL Configuration */
         define('WP_HOME', 'https://' . getenv('DOMAIN'));
@@ -208,7 +211,9 @@ services:
     depends_on:
       wordpress:
         condition: service_healthy
-    image: wordpress:6.9.4-php8.2-fpm
+    build:
+      context: ./php
+      dockerfile: Dockerfile
     restart: always
     entrypoint: /bin/sh
     command: [ "-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done" ]
