@@ -62,8 +62,8 @@ services:
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-flush-method=O_DIRECT
       - --max-connections=200
-      - --query-cache-type=1
-      - --query-cache-size=128M
+      - --query-cache-type=0
+      - --query-cache-size=0
       - --tmp-table-size=128M
       - --max-heap-table-size=128M
       - --thread-cache-size=16
@@ -159,7 +159,7 @@ services:
     expose:
       - "9000"
     command: >
-      sh -c ' sed -i "s/pm.max_children = 5/pm.max_children = 16/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.start_servers = 2/pm.start_servers = 4/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.min_spare_servers = 1/pm.min_spare_servers = 2/g" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 8/g" /usr/local/etc/php-fpm.d/www.conf && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf && docker-entrypoint.sh php-fpm '
+      sh -c ' sed -i "s/^pm = dynamic/pm = static/" /usr/local/etc/php-fpm.d/www.conf && sed -i "s/pm.max_children = 5/pm.max_children = 24/g" /usr/local/etc/php-fpm.d/www.conf && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf && docker-entrypoint.sh php-fpm '
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -190,6 +190,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     healthcheck:
       test: [ "CMD-SHELL", "pidof php-fpm || exit 1" ]
@@ -200,10 +201,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 3G
         reservations:
           cpus: '0.5'
-          memory: 768M
+          memory: 1G
     security_opt:
       - no-new-privileges:true
     networks:
@@ -229,6 +230,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     deploy:
       resources:
