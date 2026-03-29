@@ -219,7 +219,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     entrypoint: /bin/sh
-    command: [ "-c", "while true; do php /var/www/html/wp-cron.php; sleep 300; done" ]
+    command: [ "-c", "while true; do php /var/www/html/wp-cron.php || true; sleep 300; done" ]
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_DB_USER: ${MYSQL_USER}
