@@ -1,0 +1,146 @@
+name: ecopc_test
+
+services:
+  db:
+    image: mariadb:10.6.18
+    restart: unless-stopped
+    command:
+      - --innodb-buffer-pool-size=512M
+      - --innodb-log-file-size=128M
+      - --innodb-flush-log-at-trx-commit=2
+      - --max-connections=80
+    environment:
+      MYSQL_ROOT_PASSWORD: ${TEST_MYSQL_ROOT_PASSWORD:-test_root_password}
+      MYSQL_DATABASE: ${TEST_MYSQL_DATABASE:-ecopc_test}
+      MYSQL_USER: ${TEST_MYSQL_USER:-admin_test}
+      MYSQL_PASSWORD: ${TEST_MYSQL_PASSWORD:-admin_test_password}
+    volumes:
+      - db_data_test:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data_test:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+
+  wordpress:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "9000"
+    command: >
+      sh -c 'sed -i "s/^pm = dynamic/pm = static/" /usr/local/etc/php-fpm.d/www.conf
+      && sed -i "s/pm.max_children = 5/pm.max_children = 12/g" /usr/local/etc/php-fpm.d/www.conf
+      && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf
+      && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf
+      && docker-entrypoint.sh php-fpm'
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${TEST_MYSQL_USER:-admin_test}
+      WORDPRESS_DB_PASSWORD: ${TEST_MYSQL_PASSWORD:-admin_test_password}
+      WORDPRESS_DB_NAME: ${TEST_MYSQL_DATABASE:-ecopc_test}
+      WORDPRESS_TABLE_PREFIX: ${TEST_WORDPRESS_TABLE_PREFIX:-wp_test_}
+      TEST_DOMAIN: ${TEST_DOMAIN:-test.ecopc.local}
+      WORDPRESS_CONFIG_EXTRA: |
+        if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
+        if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
+        if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
+        if (!defined('WP_REDIS_TIMEOUT')) define('WP_REDIS_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'none');
+        if (!defined('WP_REDIS_PREFIX')) define('WP_REDIS_PREFIX', 'ecopc_test:');
+        if (!defined('DISABLE_WP_CRON')) define('DISABLE_WP_CRON', true);
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $$_SERVER['HTTPS'] = 'on';
+        }
+    volumes:
+      - wp_data_test:/var/www/html
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pidof php-fpm || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:1.28.3-alpine
+    restart: unless-stopped
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    ports:
+      - "${TEST_HTTP_PORT:-8082}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - wp_data_test:/var/www/html:ro
+      - nginx_cache_test:/var/cache/nginx
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+
+  wp-cron:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    entrypoint: /bin/sh
+    command: ["-c", "while true; do php /var/www/html/wp-cron.php || true; sleep 300; done"]
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${TEST_MYSQL_USER:-admin_test}
+      WORDPRESS_DB_PASSWORD: ${TEST_MYSQL_PASSWORD:-admin_test_password}
+      WORDPRESS_DB_NAME: ${TEST_MYSQL_DATABASE:-ecopc_test}
+      WORDPRESS_TABLE_PREFIX: ${TEST_WORDPRESS_TABLE_PREFIX:-wp_test_}
+    volumes:
+      - wp_data_test:/var/www/html
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+    networks:
+      - backend
+
+volumes:
+  db_data_test:
+  wp_data_test:
+  redis_data_test:
+  nginx_cache_test:
+
+networks:
+  backend:
+    driver: bridge
+    internal: true
