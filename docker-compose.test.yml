@@ -98,6 +98,7 @@ services:
       start_period: 60s
     networks:
       - backend
+      - internet
 
   nginx:
     image: nginx:1.28.3-alpine
@@ -143,6 +144,7 @@ services:
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
     networks:
       - backend
+      - internet
 
 volumes:
   db_data_test:
@@ -156,3 +158,5 @@ networks:
   backend:
     driver: bridge
     internal: true
+  internet:
+    driver: bridge
