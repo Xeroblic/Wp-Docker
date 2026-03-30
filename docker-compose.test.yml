@@ -63,8 +63,9 @@ services:
       WORDPRESS_DB_PASSWORD: ${TEST_MYSQL_PASSWORD:-admin_test_password}
       WORDPRESS_DB_NAME: ${TEST_MYSQL_DATABASE:-ecopc_test}
       WORDPRESS_TABLE_PREFIX: ${TEST_WORDPRESS_TABLE_PREFIX:-wp_test_}
-      TEST_DOMAIN: ${TEST_DOMAIN:-test.ecopc.local}
+      DOMAIN: ${TEST_DOMAIN:-testing.ecopc.cl}
       WORDPRESS_CONFIG_EXTRA: |
+        /* Redis Object Cache */
         if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
         if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
         if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
@@ -72,7 +73,15 @@ services:
         if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
         if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'none');
         if (!defined('WP_REDIS_PREFIX')) define('WP_REDIS_PREFIX', 'ecopc_test:');
-        if (!defined('DISABLE_WP_CRON')) define('DISABLE_WP_CRON', true);
+
+        /* Site URL Configuration */
+        define('WP_HOME', 'https://' . getenv('DOMAIN'));
+        define('WP_SITEURL', 'https://' . getenv('DOMAIN'));
+
+        /* Disable WP Cron (handled by wp-cron service) */
+        define('DISABLE_WP_CRON', true);
+
+        /* Parche para proxy Easypanel (SSL termination) */
         if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
             $$_SERVER['HTTPS'] = 'on';
         }
@@ -96,8 +105,8 @@ services:
     depends_on:
       wordpress:
         condition: service_healthy
-    ports:
-      - "${TEST_HTTP_PORT:-8082}:80"
+    expose:
+      - "80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - wp_data_test:/var/www/html:ro
