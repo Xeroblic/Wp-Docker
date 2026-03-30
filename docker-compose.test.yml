@@ -117,6 +117,7 @@ services:
       timeout: 10s
       retries: 3
     networks:
+      - frontend
       - backend
 
   wp-cron:
@@ -150,6 +151,8 @@ volumes:
   nginx_cache_test:
 
 networks:
+  frontend:
+    driver: bridge
   backend:
     driver: bridge
     internal: true
