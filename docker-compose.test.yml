@@ -52,7 +52,8 @@ services:
     expose:
       - "9000"
     command: >
-      sh -c 'sed -i "s/^pm = dynamic/pm = static/" /usr/local/etc/php-fpm.d/www.conf
+      sh -c 'chown -R www-data:www-data /var/www/html/wp-content
+      && sed -i "s/^pm = dynamic/pm = static/" /usr/local/etc/php-fpm.d/www.conf
       && sed -i "s/pm.max_children = 5/pm.max_children = 12/g" /usr/local/etc/php-fpm.d/www.conf
       && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf
       && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf
