@@ -72,7 +72,7 @@ services:
         if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
         if (!defined('WP_REDIS_TIMEOUT')) define('WP_REDIS_TIMEOUT', 0.5);
         if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
-        if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'none');
+        if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'lz4');
         if (!defined('WP_REDIS_PREFIX')) define('WP_REDIS_PREFIX', 'ecopc_test:');
 
         /* Site URL Configuration */
