@@ -174,6 +174,8 @@ services:
         if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
         if (!defined('WP_REDIS_TIMEOUT')) define('WP_REDIS_TIMEOUT', 0.5);
         if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_MAX_RETRIES')) define('WP_REDIS_MAX_RETRIES', 3);
+        if (!defined('WP_REDIS_RETRY_INTERVAL')) define('WP_REDIS_RETRY_INTERVAL', 100);
         if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'lz4');
 
         /* Site URL Configuration */
@@ -227,6 +229,29 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX:-wp_}
+      DOMAIN: ${DOMAIN}
+      WORDPRESS_CONFIG_EXTRA: |
+        /* Redis Object Cache */
+        if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
+        if (!defined('WP_REDIS_PORT')) define('WP_REDIS_PORT', 6379);
+        if (!defined('WP_REDIS_CLIENT')) define('WP_REDIS_CLIENT', 'phpredis');
+        if (!defined('WP_REDIS_TIMEOUT')) define('WP_REDIS_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_READ_TIMEOUT')) define('WP_REDIS_READ_TIMEOUT', 0.5);
+        if (!defined('WP_REDIS_MAX_RETRIES')) define('WP_REDIS_MAX_RETRIES', 3);
+        if (!defined('WP_REDIS_RETRY_INTERVAL')) define('WP_REDIS_RETRY_INTERVAL', 100);
+        if (!defined('WP_REDIS_COMPRESSION')) define('WP_REDIS_COMPRESSION', 'lz4');
+
+        /* Site URL Configuration */
+        define('WP_HOME', 'https://' . getenv('DOMAIN'));
+        define('WP_SITEURL', 'https://' . getenv('DOMAIN'));
+
+        /* Disable WP Cron (handled by wp-cron service) */
+        define('DISABLE_WP_CRON', true);
+
+        /** Parche Dinámico para el Proxy de Easypanel/Traefik **/
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $$_SERVER['HTTPS'] = 'on';
+        }
     volumes:
       - wp_data:/var/www/html
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
