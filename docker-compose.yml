@@ -8,6 +8,10 @@ services:
       MYSQL_DATABASE: root
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
+    command:
+      - --innodb-buffer-pool-size=1G
+      - --innodb-log-file-size=256M
+      - --innodb-flush-log-at-trx-commit=2
 
   redis:
     image: redis:7-alpine
@@ -35,6 +39,9 @@ services:
         define('WP_REDIS_HOST', 'redis');
         define('WP_REDIS_PORT', 6379);
         define('DISABLE_WP_CRON', true);
+        define('WP_MEMORY_LIMIT', '512M');
+        define('WP_MAX_MEMORY_LIMIT', '1024M');
+        @ini_set( 'memory_limit', '1024M' );
         @ini_set( 'upload_max_size' , '2G' );
         @ini_set( 'post_max_size', '2G' );
         @ini_set( 'max_execution_time', '300' );
@@ -52,6 +59,14 @@ services:
         }
     volumes:
       - wp_data:/var/www/html/wp-content
+
+  wp-cron:
+    image: curlimages/curl:latest
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["while true; do curl -s http://wordpress/wp-cron.php > /dev/null 2>&1; sleep 60; done"]
 
 volumes:
   db_data:
