@@ -116,6 +116,7 @@ services:
       - "80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
       - wp_data_test:/var/www/html:ro
       - nginx_cache_test:/var/cache/nginx
     healthcheck:

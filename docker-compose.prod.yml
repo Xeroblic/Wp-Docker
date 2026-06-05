@@ -127,6 +127,7 @@ services:
     #   - "traefik.http.services.wordpress.loadbalancer.server.port=80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
       - wp_data:/var/www/html:ro
       - nginx_cache:/var/cache/nginx
     healthcheck:
