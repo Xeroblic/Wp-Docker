@@ -1,0 +1,132 @@
+services:
+  db:
+    image: mariadb:10.6
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    command:
+      - --innodb-buffer-pool-size=1G
+      - --innodb-log-file-size=256M
+      - --innodb-flush-log-at-trx-commit=2
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://nginx:8080
+    depends_on:
+      - nginx
+
+  nginx-cache-init:
+    image: busybox:1.36
+    network_mode: none
+    command: sh -c 'mkdir -p /var/cache/nginx && chown -R 101:33 /var/cache/nginx && chmod -R 775 /var/cache/nginx'
+    volumes:
+      - nginx_cache:/var/cache/nginx
+    security_opt:
+      - no-new-privileges:true
+
+  nginx:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    restart: unless-stopped
+    command: sh -c 'umask 002 && exec nginx -g "daemon off;"'
+    user: "101:33"
+    depends_on:
+      nginx-cache-init:
+        condition: service_completed_successfully
+      wordpress:
+        condition: service_started
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - wp_data:/var/www/html:ro
+      - nginx_cache:/var/cache/nginx
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "-U", "Docker-Healthcheck", "http://127.0.0.1:8080/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+      - /var/run:rw,noexec,nosuid,size=16m
+
+  wordpress:
+    depends_on:
+      - db
+      - redis
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    expose:
+      - "9000"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: root
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        define('DISABLE_WP_CRON', true);
+        define('WP_MEMORY_LIMIT', '512M');
+        define('WP_MAX_MEMORY_LIMIT', '1024M');
+        @ini_set( 'memory_limit', '1024M' );
+        @ini_set( 'upload_max_size' , '2G' );
+        @ini_set( 'post_max_size', '2G' );
+        @ini_set( 'max_execution_time', '300' );
+        if (isset($$_SERVER['HTTP_CF_VISITOR'])) {
+            $$proxy_host = $$_SERVER['HTTP_HOST'];
+            define('WP_HOME', 'https://' . $$proxy_host);
+            define('WP_SITEURL', 'https://' . $$proxy_host);
+            $$_SERVER['HTTPS'] = 'on';
+            $$_SERVER['SERVER_PORT'] = 443;
+            
+            # EL TRUCO: Interceptar el HTML de salida y reemplazar localhost por el túnel dinámico
+            ob_start(function($$buffer) use ($$proxy_host) {
+                return str_replace('http://localhost:8081', 'https://' . $$proxy_host, $$buffer);
+            });
+        }
+    volumes:
+      - wp_data:/var/www/html
+      - nginx_cache:/var/cache/nginx
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+
+  wp-cron:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    entrypoint: /bin/sh
+    command: ["-c", "while true; do php /var/www/html/wp-cron.php || true; sleep 300; done"]
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: root
+    volumes:
+      - wp_data:/var/www/html
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+
+volumes:
+  db_data:
+  wp_data:
+  nginx_cache:
