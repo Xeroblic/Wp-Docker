@@ -113,6 +113,7 @@ services:
   nginx:
     image: nginx:1.28.3-alpine
     restart: always
+    command: sh -c 'umask 000 && exec nginx -g "daemon off;"'
     depends_on:
       wordpress:
         condition: service_healthy
@@ -185,12 +186,16 @@ services:
         /* Disable WP Cron (handled by wp-cron service) */
         define('DISABLE_WP_CRON', true);
 
+        /* Nginx Helper - Cache purge path */
+        define('RT_WP_NGINX_HELPER_CACHE_PATH', '/var/cache/nginx/fastcgi');
+
         /** Parche Dinámico para el Proxy de Easypanel/Traefik **/
         if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
             $$_SERVER['HTTPS'] = 'on';
         }
     volumes:
       - wp_data:/var/www/html
+      - nginx_cache:/var/cache/nginx    # Shared volume for Nginx Helper cache purge
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
