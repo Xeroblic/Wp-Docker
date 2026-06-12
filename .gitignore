@@ -1,0 +1,9 @@
+.env
+
+# Vendor themes (Astra core, default WP themes) - reinstalled via WP-CLI/wp-admin,
+# only the child theme is versioned.
+wp-content/themes/*
+!wp-content/themes/astra-child
+/wp-content
+/elementor-templates
+.DS_Store
