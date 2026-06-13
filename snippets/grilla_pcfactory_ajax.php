@@ -215,7 +215,7 @@ function mundoplanet_ajax_products_shortcode($atts) {
         .mp-title           { font-size: 14px !important; font-weight: 600 !important; color: #2d3748 !important; line-height: 1.3 !important; margin: 0 0 15px 0 !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 36px; }
         .mp-meta-row        { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 15px; color: #718096; }
         .mp-discount-row    { display: flex; align-items: center; gap: 10px; height: 24px; margin-bottom: 5px; }
-        .mp-badge-discount  { background: #1a365d; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+        .mp-badge-discount  { background: #1A0DFF; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
         .mp-old-price       { color: #a0aec0; font-size: 13px; }
         .mp-badge-placeholder { height: 24px; display: block; }
         .mp-main-price-wrap { margin-bottom: 20px; }

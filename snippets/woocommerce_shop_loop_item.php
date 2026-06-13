@@ -68,34 +68,31 @@ function mp_tarjeta_clon_pcfactory() {
 
         <a href="<?php echo esc_url(get_permalink()); ?>" style="text-decoration:none; display:flex; flex-direction:column; flex-grow:1;">
             
-            <figure style="margin:0 0 15px 0; height:200px; display:flex; align-items:center; justify-content:center;">
+            <figure style="margin:0 0 12px 0; height:190px; display:flex; align-items:center; justify-content:center;">
                 <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" style="max-height:100%; width:auto; object-fit:contain;">
             </figure>
 
             <div style="display:flex; flex-direction:column; flex-grow:1;">
-                <p style="font-size:12px; color:#94a3b8; text-transform:uppercase; font-weight:600; margin:0 0 5px 0;"> <?php echo esc_html($brand); ?>&reg; </p>
-                <h3 style="font-size:15px; font-weight:700; color:#1e293b; line-height:1.35; margin:0 0 10px 0; min-height:41px;">
-                    <?php echo get_the_title(); ?>
-                </h3>
-                
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px;">
+                <p style="font-size:12px; color:#94a3b8; text-transform:uppercase; font-weight:600; margin:0 0 4px 0;"> <?php echo esc_html($brand); ?>&reg; </p>
+                <h3 class="mp-loop-title" style="margin:0 0 8px 0;"><span><?php echo get_the_title(); ?></span></h3>
+
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px;">
                     <span style="color:#64748b;">ID <strong style="color:#1e293b;"><?php echo esc_html($sku); ?></strong></span>
                     <span style="color:<?php echo $stock_color; ?>; font-weight:600;"><?php echo $stock_text; ?></span>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:8px; height:24px; margin-bottom:15px;">
+                <div style="display:flex; align-items:center; gap:8px; height:22px; margin-bottom:8px;">
                     <?php if ($has_discount) : ?>
-                        <span style="background:#23c16b; color:#fff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:4px;">-<?php echo $discount_percent; ?>%</span>
+                        <span style="background:#1A0DFF; color:#fff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:4px;">-<?php echo $discount_percent; ?>%</span>
                         <del style="color:#94a3b8; font-size:12px;"><?php echo wc_price($regular_price); ?></del>
                     <?php endif; ?>
                 </div>
-                
+
                 <div style="margin-top:auto;">
-                    <p style="font-size:24px; font-weight:900; color:#111; margin:0; line-height:1;"><?php echo $precio_transferencia; ?></p>
-                    <p style="font-size:12px; color:#64748b; margin:4px 0 0 0;">Transferencia / Débito</p>
-                    <p style="font-size:14px; color:#64748b; margin:10px 0 0 0;">
-                        <?php echo $precio_otros; ?> <span style="font-weight:400; font-size:12px;">Otros medios de pagos</span>
-                    </p>
+                    <p style="font-size:24px; font-weight:900; color:#111; margin:0; line-height:1.1;"><?php echo $precio_transferencia; ?></p>
+                    <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Transferencia / Débito</p>
+                    <p style="font-size:15px; color:#475569; margin:8px 0 0 0; line-height:1.2;"><?php echo $precio_otros; ?></p>
+                    <p style="font-size:12px; color:#94a3b8; margin:1px 0 0 0;">Otros medios de pago</p>
                 </div>
             </div>
         </a>
@@ -114,6 +111,25 @@ function mp_tarjeta_clon_pcfactory() {
             }
             ul.products li.product { display: flex; min-width: 0; }
             ul.products li.product .mp-product-card { width: 100%; }
+
+            /* Título a 2 líneas con elipsis. El clamp va en el <span> interno
+               (display block) y no en el <h3>, que es flex-item y rompería el
+               -webkit-box. height fija = 2 líneas para alinear las tarjetas. */
+            .mp-product-card .mp-loop-title {
+                font-size: 12px;
+                font-weight: 700;
+                color: #1e293b;
+                line-height: 1.45;
+                min-height: 35px; /* reserva 2 líneas para alinear las tarjetas */
+            }
+            .mp-product-card .mp-loop-title span {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                /* sin height fija: el clamp corta el texto a 2 líneas con su alto
+                   natural, sin recortar los descensores de la 2ª línea */
+            }
 
             /* Móvil: una columna ancha en vez de dos apretadas */
             @media (max-width: 600px) {
