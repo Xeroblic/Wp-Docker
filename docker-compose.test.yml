@@ -65,6 +65,7 @@ services:
       WORDPRESS_DB_NAME: ${TEST_MYSQL_DATABASE:-ecopc_test}
       WORDPRESS_TABLE_PREFIX: ${TEST_WORDPRESS_TABLE_PREFIX:-wp_test_}
       DOMAIN: ${TEST_DOMAIN:-testing.ecopc.cl}
+      WORDPRESS_DEBUG: 1
       WORDPRESS_CONFIG_EXTRA: |
         /* Redis Object Cache */
         if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
@@ -145,6 +146,7 @@ services:
       WORDPRESS_DB_NAME: ${TEST_MYSQL_DATABASE:-ecopc_test}
       WORDPRESS_TABLE_PREFIX: ${TEST_WORDPRESS_TABLE_PREFIX:-wp_test_}
       DOMAIN: ${TEST_DOMAIN:-testing.ecopc.cl}
+      WORDPRESS_DEBUG: 1
       WORDPRESS_CONFIG_EXTRA: |
         /* Redis Object Cache */
         if (!defined('WP_REDIS_HOST')) define('WP_REDIS_HOST', 'redis');
