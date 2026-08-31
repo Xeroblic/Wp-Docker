@@ -130,7 +130,10 @@ services:
     command: sh -c 'deluser nginx && addgroup -g 33 nginx && adduser -u 33 -D -S -G nginx nginx && chown -R nginx:nginx /var/cache/nginx && umask 000 && exec nginx -g "daemon off;"'
     depends_on:
       wordpress:
+        # restart: true -> si wordpress se recrea, Compose reinicia nginx.
+        # Red de seguridad adicional al resolver dinamico de nginx.conf.
         condition: service_healthy
+        restart: true
     expose:
       - "80"
     # labels:
