@@ -141,7 +141,7 @@ services:
       wordpress:
         condition: service_healthy
     entrypoint: /bin/sh
-    command: ["-c", "while true; do php /var/www/html/wp-cron.php || true; sleep 300; done"]
+    command: ["-c", "while true; do date +%s > /tmp/wp-cron-heartbeat; echo \"[wp-cron] run $$(date -u +%FT%TZ)\"; php -d memory_limit=640M /var/www/html/wp-cron.php || echo \"[wp-cron] FALLO rc=$$?\"; sleep 300; done"]
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: ${TEST_MYSQL_USER:-admin_test}
@@ -176,6 +176,17 @@ services:
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /tmp/wp-cron-heartbeat ] && [ $$(( $$(date +%s) - $$(cat /tmp/wp-cron-heartbeat) )) -lt 900 ]"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
     networks:
       - backend
       - internet

@@ -245,7 +245,11 @@ services:
       dockerfile: Dockerfile
     restart: always
     entrypoint: /bin/sh
-    command: [ "-c", "while true; do php /var/www/html/wp-cron.php || true; sleep 300; done" ]
+    # -d memory_limit=640M: tope por proceso POR DEBAJO del limite de cgroup
+    # (768M). Asi un job pesado muere con un error PHP registrable en vez de
+    # ser aniquilado por el OOM killer del cgroup sin dejar rastro, que es lo
+    # que ocurrio los 15, 22 y 29 de agosto con el limite anterior de 384M.
+    command: [ "-c", "while true; do date +%s > /tmp/wp-cron-heartbeat; echo \"[wp-cron] run $$(date -u +%FT%TZ)\"; php -d memory_limit=640M /var/www/html/wp-cron.php || echo \"[wp-cron] FALLO rc=$$?\"; sleep 300; done" ]
     environment:
       WORDPRESS_DB_HOST: "db:3306"
       WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -280,14 +284,23 @@ services:
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -f /tmp/wp-cron-heartbeat ] && [ $$(( $$(date +%s) - $$(cat /tmp/wp-cron-heartbeat) )) -lt 900 ]" ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     stop_grace_period: 30s
+    # 384M era insuficiente: los procesos PHP alcanzaban 380-390 MiB y el
+    # cgroup los mataba (OOM del 15, 22 y 29 de agosto de 2026). 768M da
+    # margen real a los jobs semanales de WooCommerce/Action Scheduler.
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 768M
         reservations:
           cpus: '0.1'
-          memory: 96M
+          memory: 128M
     security_opt:
       - no-new-privileges:true
     networks:
