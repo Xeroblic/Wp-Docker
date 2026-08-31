@@ -95,11 +95,11 @@ services:
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
       - ./php/fpm-pool.test.conf:/usr/local/etc/php-fpm.d/zz-ecopc.conf:ro
     healthcheck:
-      test: ["CMD-SHELL", "pidof php-fpm || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      test: ["CMD", "fpm-healthcheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 90s
     networks:
       - backend
       - internet
