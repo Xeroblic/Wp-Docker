@@ -75,6 +75,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    # 60s para que InnoDB cierre limpio; con el default de 10s una BD ocupada
+    # puede recibir SIGKILL y arrancar en crash recovery.
+    stop_grace_period: 60s
     deploy:
       resources:
         limits:
@@ -98,6 +101,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    stop_grace_period: 30s
     deploy:
       resources:
         limits:
@@ -135,6 +139,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    stop_grace_period: 30s
     deploy:
       resources:
         limits:
@@ -211,6 +216,13 @@ services:
       timeout: 5s
       retries: 4
       start_period: 90s
+    # SIGQUIT es el apagado GRACEFUL de php-fpm (SIGTERM lo aborta en seco) y
+    # 90s > request_terminate_timeout (120s no cabe, pero cubre el caso normal).
+    # Con el default de 10s, php-fpm con peticiones en vuelo no alcanzaba a
+    # salir y Docker lo mataba con SIGKILL -> exit 137 con OOMKilled=false,
+    # exactamente lo observado el 2026-08-31.
+    stop_signal: SIGQUIT
+    stop_grace_period: 90s
     deploy:
       resources:
         limits:
@@ -268,6 +280,7 @@ services:
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+    stop_grace_period: 30s
     deploy:
       resources:
         limits:

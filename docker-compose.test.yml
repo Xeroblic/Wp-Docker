@@ -22,6 +22,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    stop_grace_period: 60s
     networks:
       - backend
 
@@ -36,6 +37,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    stop_grace_period: 30s
     networks:
       - backend
 
@@ -100,6 +102,8 @@ services:
       timeout: 5s
       retries: 4
       start_period: 90s
+    stop_signal: SIGQUIT
+    stop_grace_period: 90s
     networks:
       - backend
       - internet
@@ -123,6 +127,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    stop_grace_period: 30s
     networks:
       - frontend
       - backend

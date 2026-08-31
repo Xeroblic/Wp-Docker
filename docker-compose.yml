@@ -12,10 +12,12 @@ services:
       - --innodb-buffer-pool-size=1G
       - --innodb-log-file-size=256M
       - --innodb-flush-log-at-trx-commit=2
+    stop_grace_period: 60s
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    stop_grace_period: 30s
     
   tunnel:
     image: cloudflare/cloudflared:latest
@@ -62,6 +64,7 @@ services:
       - wp_data:/var/www/html/wp-content
       - ./wp-content/themes:/var/www/html/wp-content/themes
       - ./wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
+    stop_grace_period: 60s
 
   wp-cli:
     image: wordpress:cli
