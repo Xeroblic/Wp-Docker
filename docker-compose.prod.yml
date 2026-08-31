@@ -57,7 +57,7 @@ services:
       - MYSQL_USER
       - MYSQL_PASSWORD
     command:
-      - --innodb-buffer-pool-size=2G
+      - --innodb-buffer-pool-size=1G
       - --innodb-log-file-size=256M
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-flush-method=O_DIRECT
@@ -81,10 +81,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 2G
         reservations:
           cpus: '0.5'
-          memory: 1G
+          memory: 768M
     security_opt:
       - no-new-privileges:true
     networks:
@@ -93,7 +93,7 @@ services:
   redis:
     image: redis:7.2-alpine
     restart: always
-    command: redis-server --appendonly yes --maxmemory 768mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --save 900 1 --save 300 10 --save 60 10000
     volumes:
       - redis_data:/data
     healthcheck:
@@ -105,7 +105,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 768M
         reservations:
           cpus: '0.25'
           memory: 256M
@@ -143,7 +143,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 256M
         reservations:
           cpus: '0.25'
           memory: 96M
@@ -226,10 +226,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 2G
         reservations:
           cpus: '0.5'
-          memory: 1G
+          memory: 768M
     security_opt:
       - no-new-privileges:true
     networks:
