@@ -85,6 +85,11 @@ services:
         reservations:
           cpus: '0.5'
           memory: 768M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:
@@ -109,6 +114,11 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:
@@ -147,6 +157,11 @@ services:
         reservations:
           cpus: '0.25'
           memory: 96M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:
@@ -230,6 +245,11 @@ services:
         reservations:
           cpus: '0.5'
           memory: 768M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:
@@ -301,6 +321,11 @@ services:
         reservations:
           cpus: '0.1'
           memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:

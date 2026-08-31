@@ -27,6 +27,11 @@ services:
       resources:
         limits:
           memory: 1G
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backend
 
@@ -46,6 +51,11 @@ services:
       resources:
         limits:
           memory: 384M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backend
 
@@ -116,6 +126,11 @@ services:
       resources:
         limits:
           memory: 1G
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backend
       - internet
@@ -144,6 +159,11 @@ services:
       resources:
         limits:
           memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - frontend
       - backend
@@ -203,6 +223,11 @@ services:
       resources:
         limits:
           memory: 768M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backend
       - internet
