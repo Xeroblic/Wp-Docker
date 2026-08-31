@@ -135,7 +135,7 @@ services:
       - wp_data_test:/var/www/html:ro
       - nginx_cache_test:/var/cache/nginx
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/nginx-health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/nginx-health"]
       interval: 30s
       timeout: 10s
       retries: 3
