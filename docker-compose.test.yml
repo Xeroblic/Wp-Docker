@@ -51,13 +51,10 @@ services:
         condition: service_healthy
     expose:
       - "9000"
+    # Tuning del pool en php/fpm-pool.test.conf (mismo mecanismo que prod)
     command: >
       sh -c 'chown -R www-data:www-data /var/www/html/wp-content
-      && sed -i "s/^pm = dynamic/pm = static/" /usr/local/etc/php-fpm.d/www.conf
-      && sed -i "s/pm.max_children = 5/pm.max_children = 12/g" /usr/local/etc/php-fpm.d/www.conf
-      && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf
-      && echo "request_terminate_timeout = 120" >> /usr/local/etc/php-fpm.d/www.conf
-      && docker-entrypoint.sh php-fpm'
+      && exec docker-entrypoint.sh php-fpm'
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: ${TEST_MYSQL_USER:-admin_test}
@@ -96,6 +93,7 @@ services:
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - ./php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
       - ./php/redis-config.php:/usr/local/etc/php/redis-config.php:ro
+      - ./php/fpm-pool.test.conf:/usr/local/etc/php-fpm.d/zz-ecopc.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "pidof php-fpm || exit 1"]
       interval: 30s
