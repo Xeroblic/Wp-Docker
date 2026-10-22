@@ -7,7 +7,7 @@ Infraestructura de WordPress optimizada para entornos de alta concurrencia y pro
 La arquitectura se compone de los siguientes servicios interconectados:
 
 *   **Nginx (1.28.3-alpine)**: Configurado como servidor web de cara al público y proxy inverso para FastCGI. Implementa almacenamiento en caché de páginas completas (FastCGI Cache) con reglas inteligentes para omitir el caché en páginas dinámicas (carrito, mi cuenta, administración) y mantenerlo para campañas con parámetros de rastreo (UTM, gclid, fbclid).
-*   **WordPress (PHP-FPM 8.2)**: Contenedor personalizado basado en la imagen oficial, modificado para compilar la extensión Redis con soporte para compresión LZ4, además de incluir configuraciones optimizadas de OPcache (con JIT activo) y límites de ejecución adaptados para cargas pesadas.
+*   **WordPress (PHP-FPM 8.4)**: Contenedor personalizado basado en la imagen oficial, modificado para compilar la extensión Redis con soporte para compresión LZ4, además de incluir configuraciones optimizadas de OPcache (con JIT activo) y límites de ejecución adaptados para cargas pesadas.
 *   **Redis (7.2-alpine)**: Almacenamiento en caché de objetos en memoria intermedia para evitar consultas repetitivas a la base de datos, configurado con políticas de desalojo LRU (Least Recently Used) y persistencia selectiva.
 *   **MariaDB (10.6.18)**: Motor de base de datos relacional ajustado con directrices específicas de rendimiento (InnoDB buffer pool, log file size, límites de conexiones).
 *   **Cron Desacoplado**: Un contenedor dedicado ejecuta las tareas cron de WordPress (`wp-cron.php`) en segundo plano cada 5 minutos (o 60 segundos en local) para evitar la latencia que produce la ejecución nativa en las visitas de los usuarios.
