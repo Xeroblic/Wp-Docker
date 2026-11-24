@@ -82,8 +82,10 @@ services:
       - ./wp-content/themes:/var/www/html/wp-content/themes
       - ./wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
     # Comprueba que Apache/PHP sirven de verdad, no solo que el proceso exista
+    # follow_location=0 y Host=localhost:8081 evitan que el 301 de WordPress
+    # hacia :8081 (puerto del host, no del contenedor) rompa el healthcheck.
     healthcheck:
-      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://localhost/\") === false ? 1 : 0);'"]
+      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://localhost/\", false, stream_context_create([\"http\" => [\"follow_location\" => 0, \"header\" => \"Host: localhost:8081\"]])) === false ? 1 : 0);'"]
       interval: 15s
       timeout: 10s
       retries: 5
