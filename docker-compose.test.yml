@@ -138,7 +138,23 @@ services:
   nginx:
     image: nginx:1.28.3-alpine
     restart: unless-stopped
-    command: sh -c 'deluser nginx && addgroup -g 33 nginx && adduser -u 33 -D -S -G nginx nginx && chown -R nginx:nginx /var/cache/nginx && umask 000 && exec nginx -g "daemon off;"'
+    environment:
+      OFFICE_IPS: ${OFFICE_IPS:-}
+    command:
+      - sh
+      - -c
+      - |
+        deluser nginx && addgroup -g 33 nginx && adduser -u 33 -D -S -G nginx nginx && chown -R nginx:nginx /var/cache/nginx && \
+        : > /etc/nginx/office-ips.conf && \
+        set -f && \
+        for ip in $$OFFICE_IPS; do
+          if printf '%s\n' "$$ip" | grep -Eq '^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}(/([1-9]|[12][0-9]|3[0-2]))?$$'; then
+            printf '%s 1;\n' "$$ip" >> /etc/nginx/office-ips.conf
+          else
+            printf '[nginx] WARNING: ignoring invalid OFFICE_IPS entry: %s\n' "$$ip" >&2
+          fi
+        done && \
+        umask 000 && exec nginx -g "daemon off;"
     depends_on:
       wordpress:
         condition: service_healthy
